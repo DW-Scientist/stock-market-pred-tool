@@ -11,6 +11,7 @@ from ta.trend import MACD
 from ta.momentum import RSIIndicator
 from io import BytesIO
 from model_creation.lstm import LstmModel
+from model_creation.lstm_model import LstmPredictionModel
 import altair as alt
 
 
@@ -47,6 +48,42 @@ if select_start_date < select_end_date:
     )
 else:
     st.sidebar.error("Your Start Date has to be smaller than your End Date")
+
+
+# Prediction Part
+## Select Range of Days to predict
+predict_range = st.sidebar.slider(
+    "How many days into the future do you want to predict?", 0, 90, 30
+)
+
+## OtherStuff to come
+# first_prediction_date = select_end_date + datetime.timedelta(days=1)
+# date_index_range = pd.date_range(first_prediction_date, periods=predict_range, freq="D")
+# predict_template = pd.DataFrame(
+#     index=date_index_range,
+#     columns=[
+#         "Open",
+#         "High",
+#         "Low",
+#         "Close",
+#         "Adj Close",
+#         "Volume",
+#     ],
+# ).reset_index()
+# predict_template.columns = [
+#     "Date",
+#     "Open",
+#     "High",
+#     "Low",
+#     "Close",
+#     "Adj Close",
+#     "Volume",
+# ]
+# for col in predict_template.columns[1:]:
+#     predict_template[col] = 0
+# predict_template["Date"] = predict_template["Date"].dt.date
+# predict_template.set_index("Date", inplace=True)
+
 
 ########
 # Get Stock Data from yfinance #
@@ -122,11 +159,20 @@ def get_download_link(df):
 
 st.markdown(get_download_link(stock), unsafe_allow_html=True)
 
+left, right = st.columns(2)
+with left:
+    test_predict_button = st.button(
+        f"Train LSTM Model for {stock_option} and create Test Predictions"
+    )
+with right:
+    real_predict_button = st.button(
+        f"Train LSTM Model for {stock_option} and create Real Predictions"
+    )
 
-start_training = st.button(
-    f"Train LSTM Model for {stock_option} an create Test Predictions"
-)
-if start_training:
+# start_training = st.button(
+#     f"Train LSTM Model for {stock_option} and create Test Predictions"
+# )
+if test_predict_button:
     gif_runner = st.image("data/helpers/giphy.gif", caption="Training LSTM Model")
 
     #####
@@ -157,4 +203,52 @@ if start_training:
         "The Mean Squared Error (MSE) of the prediction is `%s` " % (lstm_stock.mse)
     )
 
-    lstm_stock.prediction_frame.to_excel("test.xlsx")
+
+if real_predict_button:
+    gif_runner = st.image("data/helpers/giphy.gif", caption="Training LSTM Model")
+
+    # #####
+    # # instantiate the lstm class and train the model
+    # #####
+    # lstm_stock = LstmModel(
+    #     df=stock,
+    #     test_prediction=True,
+    #     test=True,
+    #     prediction_start=select_end_date,
+    #     prediction_range=predict_range,
+    # )
+
+    # # prepare dataset
+    # lstm_stock.data_preparation()
+
+    # # create and train the model
+    # lstm_stock.model_training()
+
+    # gif_runner.empty()
+
+    # # create predictions
+    # lstm_stock.model_predicting()
+
+    # # plot test prediction and print evaluation metrics
+    # st.line_chart(lstm_stock.prediction_frame[["TrainData", "Predictions"]])
+
+    lstmmodel = LstmPredictionModel(
+        df=stock,
+        end=select_end_date,
+        backshifting=predict_range,
+        stock_code=stock_option,
+    )
+
+    lstmmodel.data_preperation()
+
+    lstmmodel.model_creation(input_units=50, dropout_rate=0.2, epochs=25, batch_size=32)
+
+    lstmmodel.test_predictions()
+
+    lstmmodel.create_test_prediction_df()
+
+    lstmmodel.create_real_prediction()
+
+    st.line_chart(lstmmodel.full_test)
+
+    gif_runner.empty()
