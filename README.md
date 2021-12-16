@@ -37,3 +37,43 @@ By default the app loads stock data for the company Paypal for one year. Both th
 <p align="center">
 <img width="1070" alt="Bildschirmfoto 2021-12-16 um 12 35 07" src="https://user-images.githubusercontent.com/65920261/146369733-2bb82f33-ad28-4a81-9523-9759a565f680.png">
 </p>
+- Below the visuals you can see a preview of the raw stock data as a dataframe. Below the table you can click `Download excel file` to download the stock data as an Excel file. 
+<p align="center">
+<img width="663" alt="Bildschirmfoto 2021-12-16 um 12 35 17" src="https://user-images.githubusercontent.com/65920261/146380809-93cd101a-ebb2-4567-bdee-131e6e9aca8c.png">
+</p>
+
+## Sidebar and its parameters 
+Streamlit gives a great oppurtinity to allow the user to set her/his own filters. In the following I will describe you which parameters you can adjust and how this will affect the solution of the app:
+- Data Analytics Parameters
+<p align="center">
+  <img width="252" alt="Bildschirmfoto 2021-12-16 um 14 33 09" src="https://user-images.githubusercontent.com/65920261/146383308-c7318bcf-5e3b-4b28-9dc8-c288394369a7.png">
+</p>
+Those parameters are responsible for the stock data you want to query from yfinance. First you have to enter a valid Stock code - The default is **PYPL** for Paypal. You could also use sth like AAPL or TESL. You can just google for those codes. Within the datepickers below you can specify the time range which will be the base for your stock query. The default is 1 year of data backshifted from today on.
+- Data Science parameters
+<p align="center">
+<img width="253" alt="Bildschirmfoto 2021-12-16 um 14 33 24" src="https://user-images.githubusercontent.com/65920261/146383979-1439640a-e8c1-4215-85cd-d7b2c24c8c2f.png">
+</p>
+Those paramters affect the training process of the underlying LSTM models class. First of all you can change the number of training epochs. Increasing the number of epochs can enhance your result but also leads to a longer training time. The default value is 25. The second parameter you can tweek is the training batch size. Keep in mind the lower this size is the longer your training time since you batch the data into smaller pieces. The third parameter is responsible for training backshifting. That means how many days into the past do you want to take into account to predict a specific data point. The default is 30 - so you look at the last 30 days to predict the upcoming day. 
+
+## Training, Testing and Predicting
+Now to the interesting part. At the bottom of the page you should see the following:
+<p align="center">
+<img width="1029" alt="Bildschirmfoto 2021-12-16 um 15 31 37" src="https://user-images.githubusercontent.com/65920261/146390803-f6561a77-d0a8-4f2f-a8ca-42dc86beebd5.png">
+</p>
+The two different buttons you see have different functionalities:
+- **Train LSTM Model and create Test Predictions**
+By clicking this button the model takes the data you've selected above and trains model on it which creates some Test Predictions. The Predictions are based on the last part of your dataset. After you've clicked the button you will see a rocket gif which means that your model is training. For this uses the training parameters on the sidebar mentioned above. When the training process is finished you will see the following visuals and some evaluation metrics which help you to see how well the model performed:
+<p align="center">
+<img width="1077" alt="Bildschirmfoto 2021-12-16 um 15 42 22" src="https://user-images.githubusercontent.com/65920261/146392711-05f00252-70d0-4599-9771-9b04a31273df.png">
+</p>
+You can try to tweek the models parameters to get a better result.
+- **Train LSTM Model for `DesiredStockCode` and create Real Predictions**
+The second button goes through the same process as the first one. But this time the output will be a prediction of the Closing price for the upcoming day. **Please note that the model predicts the Closing price based on your selected date range. So if you want to predict the next days Closing price just leave the Datepicker for the End Date on top to its default which is the current date**. The output would look like the following:
+<p align="center">
+<img width="969" alt="Bildschirmfoto 2021-12-16 um 15 45 56" src="https://user-images.githubusercontent.com/65920261/146393174-04e65669-8a91-4258-a507-823c5146ebb9.png">
+</p>
+
+## Last words
+Please do not consider the result of the model as the real upcoming stock price prediction. So please do not use this as a buying/selling advertising tool. This project was supposed to enhance some data science and computer science skills. <br>
+Feel free to play around with the code and start creating your own stock-analyzing app. <br>
+Thx a lot to Udacity for the great Nanodegree program!!
