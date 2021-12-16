@@ -68,7 +68,7 @@ By clicking this button the model takes the data you've selected above and train
 </p>
 You can try to tweek the models parameters to get a better result.
 - **Train LSTM Model for `DesiredStockCode` and create Real Predictions**
-The second button goes through the same process as the first one. But this time the output will be a prediction of the Closing price for the upcoming day. **Please note that the model predicts the Closing price based on your selected date range. So if you want to predict the next days Closing price just leave the Datepicker for the End Date on top to its default which is the current date**. The output would look like the following:
+The second button goes through the same process as the first one. But this time the output will be a prediction of the Closing price for the upcoming day. **Please note that the model predicts the Closing price based on your selected date range. So if you want to predict the next days Closing price just leave the Datepicker for the End Date on top to its default which is the current date**. The output would look like the following:<br>
 <p align="center">
 <img width="969" alt="Bildschirmfoto 2021-12-16 um 15 45 56" src="https://user-images.githubusercontent.com/65920261/146393174-04e65669-8a91-4258-a507-823c5146ebb9.png">
 </p>
