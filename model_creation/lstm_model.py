@@ -1,3 +1,4 @@
+# import libraries
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -9,16 +10,29 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-
+# Creation our LSTM Model Class which will include functions for our button pipeline logic in the app
 class LstmPredictionModel:
-    def __init__(self, df, end, backshifting, stock_code, test_range=30):
+    """
+    This Class has been built for creating stockmarket predictions. It contains different functions which enable a from start to end training pipeline.
+    The functions store different variables into the __init__ function so they'll be accessable within the different steps of the app.
+    Required Parameters:
+    df: type(pandas dataframe): Pandas Dataframe wich contains stock data from yfinance library
+    end: type(datetime): End date of the users dateselection
+    backshifting: type(integer): Declares how many past days the model uses to predict the next day
+    stock_code:  type(string): Necessary to load the right data from yfinance
+
+    """
+
+    def __init__(self, df, end, backshifting, stock_code):
         self.df = df
         self.end = end
         self.backshifting = backshifting
         self.stock_code = stock_code
-        self.test_range = test_range
 
     def data_preperation(self):
+        """
+        This function scales the data to normalize it and creates a X_train and y_train set.
+        """
         self.scaler = MinMaxScaler(feature_range=(0, 1))
         scaled_data = self.scaler.fit_transform(self.df["Close"].values.reshape(-1, 1))
 
@@ -35,6 +49,9 @@ class LstmPredictionModel:
         )
 
     def model_creation(self, input_units, dropout_rate, epochs, batch_size):
+        """
+        This function creates a LSTM model by using the input parameters of the function. It will also already train the model to the training data.
+        """
         ## Build Model
         self.model = Sequential()
 
@@ -58,6 +75,10 @@ class LstmPredictionModel:
         self.model.fit(self.X_train, self.y_train, epochs=epochs, batch_size=batch_size)
 
     def test_predictions(self):
+        """
+        This function creates a Test set which enables the model to create some test predictions.
+        It also rescales the data so to have it back in the right format.
+        """
         # Load Test Data
         test_start = self.end + dt.timedelta(days=1)
         test_end = dt.datetime.now().date()
@@ -96,16 +117,13 @@ class LstmPredictionModel:
         self.predicted_prices = self.scaler.inverse_transform(self.predicted_prices)
 
     def create_test_prediction_df(self):
+        """
+        This function creates dataframes which can be used for plotting the test results.
+        There is a frame for both only testdata and predictions and also for the whole data.
+        """
         self.test_plot_df = self.test_df[["Close"]].copy()
         self.test_plot_df["Prediction"] = self.predicted_prices
         if self.check_delta < 30:
-            # self.full_test = pd.concat(
-            #     [
-            #         self.df[["Close"]].iloc[: len(self.df) - self.check_delta],
-            #         self.test_plot_df,
-            #     ],
-            #     axis=0,
-            # )
             self.full_test = (
                 self.df[["Close"]]
                 .iloc[: len(self.df) - self.check_delta]
@@ -117,6 +135,9 @@ class LstmPredictionModel:
             )
 
     def create_real_prediction(self):
+        """
+        This function creates a prediction for the day after the last day of the test dataset.
+        """
         real_data = [
             self.model_inputs[
                 len(self.model_inputs) - self.backshifting : len(self.model_inputs), 0
@@ -130,6 +151,9 @@ class LstmPredictionModel:
         return prediction
 
     def model_evaluation(self):
+        """
+        This function creates both the mean absolute error and the mean squared error for the test prediction.
+        """
         self.mae = mean_absolute_error(
             self.test_plot_df["Close"], self.test_plot_df["Prediction"]
         )
