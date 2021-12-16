@@ -7,14 +7,16 @@ import datetime as dt
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
 class LstmPredictionModel:
-    def __init__(self, df, end, backshifting, stock_code):
+    def __init__(self, df, end, backshifting, stock_code, test_range=30):
         self.df = df
         self.end = end
         self.backshifting = backshifting
         self.stock_code = stock_code
+        self.test_range = test_range
 
     def data_preperation(self):
         self.scaler = MinMaxScaler(feature_range=(0, 1))
@@ -57,7 +59,7 @@ class LstmPredictionModel:
 
     def test_predictions(self):
         # Load Test Data
-        test_start = self.end
+        test_start = self.end + dt.timedelta(days=1)
         test_end = dt.datetime.now().date()
         self.check_delta = (test_end - test_start).days
         if self.check_delta < 30:
@@ -94,19 +96,25 @@ class LstmPredictionModel:
         self.predicted_prices = self.scaler.inverse_transform(self.predicted_prices)
 
     def create_test_prediction_df(self):
-        test_plot_df = self.test_df[["Close"]]
-        test_plot_df["Prediction"] = self.predicted_prices
+        self.test_plot_df = self.test_df[["Close"]].copy()
+        self.test_plot_df["Prediction"] = self.predicted_prices
         if self.check_delta < 30:
-            self.full_test = pd.concat(
-                [
-                    self.df[["Close"]].iloc[: len(self.df) - self.check_delta],
-                    test_plot_df,
-                ],
-                axis=0,
+            # self.full_test = pd.concat(
+            #     [
+            #         self.df[["Close"]].iloc[: len(self.df) - self.check_delta],
+            #         self.test_plot_df,
+            #     ],
+            #     axis=0,
+            # )
+            self.full_test = (
+                self.df[["Close"]]
+                .iloc[: len(self.df) - self.check_delta]
+                .join(self.test_plot_df[["Prediction"]])
             )
         else:
-            self.full_test = pd.concat([self.df[["Close"]], test_plot_df], axis=0)
-        print(self.full_test.dtypes)
+            self.full_test = pd.concat(
+                [self.df[["Close"]], self.test_plot_df[["Prediction"]]], axis=0
+            )
 
     def create_real_prediction(self):
         real_data = [
@@ -120,3 +128,11 @@ class LstmPredictionModel:
         prediction = self.model.predict(real_data)
         prediction = self.scaler.inverse_transform(prediction)
         return prediction
+
+    def model_evaluation(self):
+        self.mae = mean_absolute_error(
+            self.test_plot_df["Close"], self.test_plot_df["Prediction"]
+        )
+        self.mse = mean_squared_error(
+            self.test_plot_df["Close"], self.test_plot_df["Prediction"]
+        )

@@ -10,7 +10,6 @@ from ta.volatility import BollingerBands
 from ta.trend import MACD
 from ta.momentum import RSIIndicator
 from io import BytesIO
-from model_creation.lstm import LstmModel
 from model_creation.lstm_model import LstmPredictionModel
 import altair as alt
 
@@ -32,7 +31,7 @@ st.markdown(
 
 # 1. Select desired Stock
 stock_option = st.sidebar.text_input(
-    "Type int the shortCode of your desired stock like AAPL for Apple", "AAPL"
+    "Type int the shortCode of your desired stock like AAPL for Apple", "PYPL"
 )
 
 # 2. Select desired Date Range
@@ -40,7 +39,6 @@ today = datetime.date.today()
 default_start = today - datetime.timedelta(days=365)
 select_start_date = st.sidebar.date_input("Select Start Date", default_start)
 select_end_date = st.sidebar.date_input("Select End Date", today)
-
 # check for right date selection
 if select_start_date < select_end_date:
     st.sidebar.success(
@@ -48,41 +46,22 @@ if select_start_date < select_end_date:
     )
 else:
     st.sidebar.error("Your Start Date has to be smaller than your End Date")
-
+# Select the training epochs for the LSTM model
+selected_training_epochs = st.sidebar.slider(
+    "Select the amount of training epochs for the LSTM. Keep in mind the higher the amount of epochs the longer takes the training",
+    min_value=25,
+)
+# Select the training batch size for the LSTM model
+selected_training_batch_size = st.sidebar.slider(
+    "Select the training Batch Size for the LSTM. Keep in mind the lower the size the longer takes the training",
+    min_value=32,
+)
 
 # Prediction Part
 ## Select Range of Days to predict
 predict_range = st.sidebar.slider(
     "How many days into the future do you want to predict?", 0, 90, 30
 )
-
-## OtherStuff to come
-# first_prediction_date = select_end_date + datetime.timedelta(days=1)
-# date_index_range = pd.date_range(first_prediction_date, periods=predict_range, freq="D")
-# predict_template = pd.DataFrame(
-#     index=date_index_range,
-#     columns=[
-#         "Open",
-#         "High",
-#         "Low",
-#         "Close",
-#         "Adj Close",
-#         "Volume",
-#     ],
-# ).reset_index()
-# predict_template.columns = [
-#     "Date",
-#     "Open",
-#     "High",
-#     "Low",
-#     "Close",
-#     "Adj Close",
-#     "Volume",
-# ]
-# for col in predict_template.columns[1:]:
-#     predict_template[col] = 0
-# predict_template["Date"] = predict_template["Date"].dt.date
-# predict_template.set_index("Date", inplace=True)
 
 
 ########
@@ -159,6 +138,12 @@ def get_download_link(df):
 
 st.markdown(get_download_link(stock), unsafe_allow_html=True)
 
+# ------------------ Model Training Part ----------------- #
+st.markdown(
+    "<h1 style='text-align: center'>Model Training and Prediction</h1>",
+    unsafe_allow_html=True,
+)
+
 left, right = st.columns(2)
 with left:
     test_predict_button = st.button(
@@ -175,62 +160,43 @@ with right:
 if test_predict_button:
     gif_runner = st.image("data/helpers/giphy.gif", caption="Training LSTM Model")
 
-    #####
-    # instantiate the lstm class and train the model
-    #####
-    lstm_stock = LstmModel(df=stock)
+    lstmmodel = LstmPredictionModel(
+        df=stock,
+        end=select_end_date,
+        backshifting=predict_range,
+        stock_code=stock_option,
+    )
 
-    # prepare dataset
-    lstm_stock.data_preparation()
+    lstmmodel.data_preperation()
 
-    # create and train the model
-    lstm_stock.model_training()
+    lstmmodel.model_creation(
+        input_units=50,
+        dropout_rate=0.2,
+        epochs=selected_training_epochs,
+        batch_size=selected_training_batch_size,
+    )
+
+    lstmmodel.test_predictions()
+
+    lstmmodel.create_test_prediction_df()
 
     gif_runner.empty()
 
-    # create predictions
-    lstm_stock.model_predicting()
+    st.line_chart(lstmmodel.test_plot_df)
+    st.line_chart(lstmmodel.full_test)
 
-    # create evaluation metrics
-    lstm_stock.model_evaluation()
+    lstmmodel.model_evaluation()
 
-    # plot test prediction and print evaluation metrics
-    st.line_chart(lstm_stock.prediction_frame[["TestData", "Predictions"]])
     st.write(
-        "The Mean Absolut Error (MAE) of the prediction is `%s` " % (lstm_stock.mae)
+        "The Mean Absolut Error (MAE) of the prediction is `%s` " % (lstmmodel.mae)
     )
     st.write(
-        "The Mean Squared Error (MSE) of the prediction is `%s` " % (lstm_stock.mse)
+        "The Mean Squared Error (MSE) of the prediction is `%s` " % (lstmmodel.mse)
     )
 
 
 if real_predict_button:
     gif_runner = st.image("data/helpers/giphy.gif", caption="Training LSTM Model")
-
-    # #####
-    # # instantiate the lstm class and train the model
-    # #####
-    # lstm_stock = LstmModel(
-    #     df=stock,
-    #     test_prediction=True,
-    #     test=True,
-    #     prediction_start=select_end_date,
-    #     prediction_range=predict_range,
-    # )
-
-    # # prepare dataset
-    # lstm_stock.data_preparation()
-
-    # # create and train the model
-    # lstm_stock.model_training()
-
-    # gif_runner.empty()
-
-    # # create predictions
-    # lstm_stock.model_predicting()
-
-    # # plot test prediction and print evaluation metrics
-    # st.line_chart(lstm_stock.prediction_frame[["TrainData", "Predictions"]])
 
     lstmmodel = LstmPredictionModel(
         df=stock,
@@ -241,14 +207,25 @@ if real_predict_button:
 
     lstmmodel.data_preperation()
 
-    lstmmodel.model_creation(input_units=50, dropout_rate=0.2, epochs=25, batch_size=32)
+    lstmmodel.model_creation(
+        input_units=50,
+        dropout_rate=0.2,
+        epochs=selected_training_epochs,
+        batch_size=selected_training_batch_size,
+    )
 
     lstmmodel.test_predictions()
 
     lstmmodel.create_test_prediction_df()
 
-    lstmmodel.create_real_prediction()
-
-    st.line_chart(lstmmodel.full_test)
+    next_day_prediction = lstmmodel.create_real_prediction()
+    prediction_date = list(lstmmodel.test_plot_df.index)[-1] + datetime.timedelta(
+        days=1
+    )
 
     gif_runner.empty()
+
+    st.write(
+        "The `%s` prediction for the Closing value of the `%s` is: `%s` "
+        % (stock_option, prediction_date.date(), next_day_prediction[0][0])
+    )
