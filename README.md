@@ -62,7 +62,7 @@ Now to the interesting part. At the bottom of the page you should see the follow
 </p>
 The two different buttons you see have different functionalities:<br>
 <br>
-- *Train LSTM Model and create Test Predictions*<br>
+- Train LSTM Model and create Test Predictions<br>
 <br>
 By clicking this button the model takes the data you've selected above and trains model on it which creates some Test Predictions. The Predictions are based on the last part of your dataset. After you've clicked the button you will see a rocket gif which means that your model is training. For this uses the training parameters on the sidebar mentioned above. When the training process is finished you will see the following visuals and some evaluation metrics which help you to see how well the model performed:
 <p align="center">
@@ -81,4 +81,4 @@ The second button goes through the same process as the first one. But this time 
 ## Last words
 Please do not consider the result of the model as the real upcoming stock price prediction. So please do not use this as a buying/selling advertising tool. This project was supposed to enhance some data science and computer science skills. <br>
 Feel free to play around with the code and start creating your own stock-analyzing app. <br>
-Thx a lot to Udacity for the great Nanodegree program!! *thx* **hello**
+Thx a lot to Udacity for the great Nanodegree program!!
