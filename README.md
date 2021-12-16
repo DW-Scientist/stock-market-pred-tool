@@ -48,7 +48,7 @@ Streamlit gives a great oppurtinity to allow the user to set her/his own filters
 <p align="center">
   <img width="252" alt="Bildschirmfoto 2021-12-16 um 14 33 09" src="https://user-images.githubusercontent.com/65920261/146383308-c7318bcf-5e3b-4b28-9dc8-c288394369a7.png">
 </p>
-Those parameters are responsible for the stock data you want to query from yfinance. First you have to enter a valid Stock code - The default is **PYPL** for Paypal. You could also use sth like AAPL or TESL. You can just google for those codes. Within the datepickers below you can specify the time range which will be the base for your stock query. The default is 1 year of data backshifted from today on.
+Those parameters are responsible for the stock data you want to query from yfinance. First you have to enter a valid Stock code - The default is **PYPL** for Paypal. You could also use sth like AAPL or TESL. You can just google for those codes. Within the datepickers below you can specify the time range which will be the base for your stock query. The default is 1 year of data backshifted from today on. <br>
 - Data Science parameters
 <p align="center">
 <img width="253" alt="Bildschirmfoto 2021-12-16 um 14 33 24" src="https://user-images.githubusercontent.com/65920261/146383979-1439640a-e8c1-4215-85cd-d7b2c24c8c2f.png">
@@ -60,14 +60,18 @@ Now to the interesting part. At the bottom of the page you should see the follow
 <p align="center">
 <img width="1029" alt="Bildschirmfoto 2021-12-16 um 15 31 37" src="https://user-images.githubusercontent.com/65920261/146390803-f6561a77-d0a8-4f2f-a8ca-42dc86beebd5.png">
 </p>
-The two different buttons you see have different functionalities:
-- **Train LSTM Model and create Test Predictions**
+The two different buttons you see have different functionalities:<br>
+<br>
+- *Train LSTM Model and create Test Predictions*<br>
+<br>
 By clicking this button the model takes the data you've selected above and trains model on it which creates some Test Predictions. The Predictions are based on the last part of your dataset. After you've clicked the button you will see a rocket gif which means that your model is training. For this uses the training parameters on the sidebar mentioned above. When the training process is finished you will see the following visuals and some evaluation metrics which help you to see how well the model performed:
 <p align="center">
 <img width="1077" alt="Bildschirmfoto 2021-12-16 um 15 42 22" src="https://user-images.githubusercontent.com/65920261/146392711-05f00252-70d0-4599-9771-9b04a31273df.png">
 </p>
-You can try to tweek the models parameters to get a better result.
-- **Train LSTM Model for `DesiredStockCode` and create Real Predictions**
+You can try to tweek the models parameters to get a better result.<br>
+<br>
+- Train LSTM Model for DesiredStockCode and create Real Predictions<br>
+<br>
 The second button goes through the same process as the first one. But this time the output will be a prediction of the Closing price for the upcoming day. **Please note that the model predicts the Closing price based on your selected date range. So if you want to predict the next days Closing price just leave the Datepicker for the End Date on top to its default which is the current date**. The output would look like the following:<br>
 <br>
 <p align="center">
@@ -77,4 +81,4 @@ The second button goes through the same process as the first one. But this time 
 ## Last words
 Please do not consider the result of the model as the real upcoming stock price prediction. So please do not use this as a buying/selling advertising tool. This project was supposed to enhance some data science and computer science skills. <br>
 Feel free to play around with the code and start creating your own stock-analyzing app. <br>
-Thx a lot to Udacity for the great Nanodegree program!!
+Thx a lot to Udacity for the great Nanodegree program!! *thx* **hello**
