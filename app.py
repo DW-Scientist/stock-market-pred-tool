@@ -52,6 +52,7 @@ else:
 selected_training_epochs = st.sidebar.slider(
     "Select the amount of training epochs for the LSTM. Keep in mind the higher the amount of epochs the longer takes the training",
     min_value=25,
+    max_value=200,
 )
 # 4. Select the training batch size for the LSTM model
 selected_training_batch_size = st.sidebar.slider(
